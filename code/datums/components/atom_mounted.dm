@@ -149,6 +149,16 @@
 		var/atom/attachable_atom
 		if(is_mountable_turf(target))
 			attachable_atom = target //your usual wallmount
+			// NOVA EDIT ADDITION BEGIN - fixing floormounts
+			//floormounts should go on plating like every other floormount in the game
+			if(isopenturf(attachable_atom))
+				var/turf/atom_as_turf = attachable_atom
+				var/plating_depth = atom_as_turf.depth_to_find_baseturf(/turf/open/floor/plating)
+				if(plating_depth != null)
+					var/atom/turf_base = atom_as_turf.baseturf_at_depth(plating_depth)
+					if(turf_base != null)
+						attachable_atom = turf_base
+			// NOVA EDIT END
 		else
 			var/list/obj/attachables = get_moutable_objects()
 			for(var/obj/attachable in target)
@@ -159,7 +169,7 @@
 			AddComponent(/datum/component/atom_mounted, attachable_atom)
 			return TRUE
 		if(msg)
-			msg += "([target.x],[target.y],[target.z]) "
+			msg += "([target] @ [target.x],[target.y],[target.z]) " // NOVA EDIT, WAS: msg += "([target.x],[target.y],[target.z]) "
 	if(msg)
 		log_mapping(msg)
 
