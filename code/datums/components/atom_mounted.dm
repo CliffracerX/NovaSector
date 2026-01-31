@@ -44,6 +44,16 @@
 /datum/component/atom_mounted/proc/on_turf_changing(datum/source, path, new_baseturfs, flags, post_change_callbacks)
 	SIGNAL_HANDLER
 
+	/// NOVA SECTOR EDIT ADDITION: fixing floormounts
+	if(isopenturf(hanging_support_atom))
+		var/turf/oldturf = hanging_support_atom
+		if(hanging_support_atom.type in new_baseturfs || path in oldturf.baseturfs)
+			qdel(src)
+			var/obj/parent_as_obj = parent
+			parent_as_obj.find_and_mount_on_atom()
+			return
+	/// NOVA SECTOR EDIT END
+
 	if(ispath(path, /turf/open))
 		drop_wallmount()
 
@@ -155,16 +165,6 @@
 		var/atom/attachable_atom
 		if(is_mountable_turf(target))
 			attachable_atom = target //your usual wallmount
-			// NOVA EDIT ADDITION BEGIN - fixing floormounts
-			//floormounts should go on plating like every other floormount in the game
-			if(isopenturf(attachable_atom))
-				var/turf/atom_as_turf = attachable_atom
-				var/plating_depth = atom_as_turf.depth_to_find_baseturf(/turf/open/floor/plating)
-				if(plating_depth != null)
-					var/atom/turf_base = atom_as_turf.baseturf_at_depth(plating_depth)
-					if(turf_base != null)
-						attachable_atom = turf_base
-			// NOVA EDIT END
 		else
 			var/list/obj/attachables = get_moutable_objects()
 			for(var/obj/attachable in target)
